@@ -4,8 +4,8 @@
 2. Устанавливаете VirtualBox: <https://www.tecmint.com/install-virtualbox-on-redhat-centos-fedora> (пример для Linux)
 3. Клонируете репозиторий со стендом и создаете виртуальную машину:
     ```bash
-    git clone https://github.com/levelup-devops/example.git  
-    cd example/vagrant
+    git clone https://github.com/levelup-devops/2023-09-example.git  
+    cd 2023-09-example/vagrant
     vagrant up  
     ```
 4. Подключаетесь к виртуальной машине:
