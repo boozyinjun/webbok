@@ -7,33 +7,48 @@ DOMAIN="test"
 # Массив из хешей, в котором задаются настройки для каждой виртуальной машины. Вданном случае только для одной lu-centos
 MACHINES = {
   :lu_ubuntu => {
+    # :box_name => "ubuntu/focal64", # Также, можно указать URL откуда стянуть нужный box если такой есть
     :box_name => "bento/ubuntu-20.04", # Также, можно указать URL откуда стянуть нужный box если такой есть
-    :host_name => "levelup",  
+    :host_name => "lu_ubuntu",  
     :ip_addr => BRIDGE_NET + "101",
     :cpu => 1,
     :ram => 512, # Megabytes
-	# :disks => {     # Дополнительные диски
-	# 	:sata1 => {
-	# 		:dfile => './sata1.vdi',
-	# 		:size => 250, # Megabytes
-	# 		:port => 1
-	# 	},
-	# }
+    :needs_controller => false,
+    :controller_name => 'SATA Controller',
+    :disks => {     # Дополнительные диски
+      :sata1 => {
+        :dfile => './sata1.vdi',
+        :size => 250, # Megabytes
+        :port => 1
+      },
+      :sata2 => {
+        :dfile => './sata2.vdi',
+        :size => 250, # Megabytes
+        :port => 2
+      },
+    }
   },
-  # :lu_centos => {
-  #   :box_name => "centos/7", # Также, можно указать URL откуда стянуть нужный box если такой есть
-  #   :host_name => "levelup",  
-  #   :ip_addr => BRIDGE_NET + "102",
-  #   :cpu => 1,
-  #   :ram => 256, # Megabytes
-	# # :disks => {     # Дополнительные диски
-	# # 	:sata1 => {
-	# # 		:dfile => './sata1.vdi',
-	# # 		:size => 250, # Megabytes
-	# # 		:port => 1
-	# # 	},
-	# # }
-  # },
+  :lu_centos => {
+    :box_name => "centos/7", # Также, можно указать URL откуда стянуть нужный box если такой есть
+    :host_name => "lu_centos",  
+    :ip_addr => BRIDGE_NET + "102",
+    :cpu => 1,
+    :ram => 256, # Megabytes
+    :needsController => true,
+    :controller_name => 'SATA Controller',
+    # :disks => {     # Дополнительные диски
+    #   :sata1 => {
+    #     :dfile => './sata1.vdi',
+    #     :size => 250, # Megabytes
+    #     :port => 1
+    #   },
+    #   :sata2 => {
+    #     :dfile => './sata2.vdi',
+    #     :size => 250, # Megabytes
+    #     :port => 2
+    #   },
+    # }
+  },
 }
 
 # Входим в Главную конфигурацию vagrant версии 2
@@ -48,7 +63,7 @@ Vagrant.configure("2") do |config|
         config.vm.define boxname do |box|
             box.vm.box = boxconfig[:box_name]               # Поднять машину из образа
             box.vm.host_name = boxconfig[:host_name]        # Hostname который будет присвоен VM (самой ОС)
-            box.vm.usable_port_range = (2200..2250)         # Пул портов, который будет использоваться для подключения к каждый VM через 127.0.0.1
+            # box.vm.usable_port_range = (2200..2250)         # Пул портов, который будет использоваться для подключения к каждый VM через 127.0.0.1
             # box.vm.network "private_network", ip: boxname[:ip], name: "VirtualBox Host-Only Ethernet Adapter" # Добавление и настройка внутреннего сетевого адаптера (Intranet)
             box.vm.network "private_network", ip: boxconfig[:ip_addr]
             # Тонкие настройки для конкретного провайдера (в нашем случае - VBoxManage)
@@ -57,23 +72,28 @@ Vagrant.configure("2") do |config|
                 vb.cpus = boxconfig[:cpu]
                 vb.memory = boxconfig[:ram]
                 # Добавление жесткого диска, если такой указан в конфигурации
-                # needsController = false
-		        # boxconfig[:disks].each do |dname, dconf|
-			    #     unless File.exist?(dconf[:dfile])       # Не создавать диск, если он уже существует
-				#     vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Fixed', '--size', dconf[:size]]
-                #     needsController =  true
-                #     end
-		        # end
-                # if needsController == true
-                #     vb.customize ["storagectl", :id, "--name", "SATA", "--add", "sata" ]
-                #     boxconfig[:disks].each do |dname, dconf|
-                #         vb.customize ['storageattach', :id,  '--storagectl', 'SATA', '--port', dconf[:port], '--device', 0, '--type', 'hdd', '--medium', dconf[:dfile]]
-                #     end
-                # end
+                if (!boxconfig[:disks].nil?)
+                  # needsController = true
+                  boxconfig[:disks].each do |dname, dconf|
+                    unless File.exist?(dconf[:dfile])       # Не создавать диск, если он уже существует
+                      vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Fixed', '--size', dconf[:size]]
+                    end
+                    # needsController =  true
+                  end
+                  if boxconfig[:needs_controller] == true
+                  # if needsController == true
+                    vb.customize ["storagectl", :id, "--name", boxconfig[:controller_name], "--add", "sata" ]
+                  end
+                  boxconfig[:disks].each do |dname, dconf|
+                    vb.customize ['storageattach', :id,  '--storagectl', boxconfig[:controller_name], '--port', dconf[:port], '--device', 0, '--type', 'hdd', '--medium', dconf[:dfile]]
+                  end
+                  # end
+                end
             end
  	    
             # Провижининг ОС настроечными скриптами
             box.vm.provision "shell", path: "scripts/setup_ssh.sh"
+            box.vm.provision "shell", path: "scripts/nginx.sh"
         end
     end
 end
