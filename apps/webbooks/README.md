@@ -14,10 +14,10 @@
 ## Запуск приложения
 
 ### Требования
-
-* JDK17 [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu)
-* Maven [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu)
-* PostgreSQL [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-20-04-quickstart)  
+**Сборка проверена на Ubuntu20.04**
+* JDK17 [ссылка для скачивания](https://download.java.net/java/GA/jdk17.0.1/2a2082e5a09d4267845be086888add4f/12/GPL/openjdk-17.0.1_linux-x64_bin.tar.gz) [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu)
+* Maven3.2 [ссылка для скачивания](https://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz) [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu)
+* PostgreSQL12 [пример установки на Ubuntu 20.04](hhttps://computingforgeeks.com/install-postgresql-12-on-ubuntu/)  
 После установки PostgreSQL необходимо:
 1. добавить пароль пользователю postgres
 ```bash
@@ -30,12 +30,18 @@ vi /etc/postgresql/12/main/postgresql.conf
 listen_addresses = '*'
 sudo systemctl restart postgresql.service
 ```
-3. восстановить демо-данные в базе
+3. создать базу данных в PostgreSQL
+```bash
+psql -h localhost -U postgres -W
+# в интерфейсе psql
+create database <DB_NAME>;
+```
+4. восстановить демо-данные в базе
 ```bash
 sudo -u postgres psql <DB_NAME> < src/main/resources/data.sql
 ```
 
-### Конфигурация базы данных
+### Конфигурация базы данных для сборки в Maven
 
 Файл конфигурации располагается по пути `src/main/resources/application.properties`
 
@@ -48,7 +54,7 @@ DB.password=Пароль
 например:
 ```java
 DB.driver=org.postgresql.Driver
-DB.url=jdbc:postgresql://localhost:5432/db_webbooks
+DB.url=jdbc:postgresql://localhost:5432/<DB_NAME>
 DB.user=postgres
 DB.password=password
 ```
@@ -56,17 +62,25 @@ DB.password=password
 
 <a name="functions"></a>
 
-**WebBooks** - Spring Boot приложение, сборка осуществляется при помощи Maven.
-Собрать jar файл и запустить его с помощью командной строки можно следующими командами:
-```
+**WebBooks** - Spring Boot приложение, сборка осуществляется при помощи Maven.  
+Собрать jar файл можно с помощью командной строки следующими командами:
+```bash
 cd webbooks
 ./mvnw package
+```
+Для запуска выполнить:
+```bash
 java -jar target/*.jar
 ```
 Или вы можете запустить его из Maven напрямую, используя Spring Boot Maven plugin:
-```
+```bash
 ./mvnw spring-boot:run
 ```
+После запуска приложение должно прослушивать порт TCP порт 8080:
+```bash
+sudo ss -tnlp
+```
+И доступно в браузере по http://<host_ip>:8080
 
 ## Реализованный функционал
 
