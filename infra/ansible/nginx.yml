@@ -1,0 +1,12 @@
+- name: Ping hosts
+  hosts: web
+  gather_facts: false
+  become: true
+  vars:
+    update_cache: yes
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        update_cache: '{{ update_cache }}'
+        name: nginx
+        state: present
