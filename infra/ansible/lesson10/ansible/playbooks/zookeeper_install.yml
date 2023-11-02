@@ -1,0 +1,9 @@
+- name: Zookeeper install
+  hosts: zookeeper
+
+  roles:
+    # - role: common
+    #   java_install: true
+    
+    - role: zookeeper
+      zookeeper_version: '3.8.3'

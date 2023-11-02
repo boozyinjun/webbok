@@ -17,7 +17,7 @@
 **Сборка проверена на Ubuntu20.04**
 * JDK17 [ссылка для скачивания](https://download.java.net/java/GA/jdk17.0.1/2a2082e5a09d4267845be086888add4f/12/GPL/openjdk-17.0.1_linux-x64_bin.tar.gz) [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu)
 * Maven3.2 [ссылка для скачивания](https://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz) [пример установки на Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu)
-* PostgreSQL12 [пример установки на Ubuntu 20.04](hhttps://computingforgeeks.com/install-postgresql-12-on-ubuntu/)  
+* PostgreSQL12 [пример установки на Ubuntu 20.04](https://computingforgeeks.com/install-postgresql-12-on-ubuntu/)  
 После установки PostgreSQL необходимо:
 1. добавить пароль пользователю postgres
 ```bash
