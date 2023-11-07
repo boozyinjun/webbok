@@ -6,6 +6,12 @@ pipeline {
         maven "MAVEN3.5.2"
     }
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+        timestamps()
+        ansiColor('xterm')
+    }
+
     environment { 
         DB_URL = "jdbc:postgresql://158.160.125.220:5432/webbooks"
     }
@@ -35,6 +41,7 @@ pipeline {
 
         stage('Artifacts') {
             when { expression { env.BRANCH_NAME == "main" } }
+
             steps {
                 dir('apps/webbooks') {
                     // Run Maven on a Unix agent.
