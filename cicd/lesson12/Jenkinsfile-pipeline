@@ -1,3 +1,7 @@
+def myFunc(arg) {
+    println (arg)
+}
+
 pipeline {
     agent { label 'master' }
 
@@ -29,7 +33,7 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == "main") {
-                        echo "${params.MY_STRING}"
+                        myFunc(params.MY_STRING)
                     }
                 
                     // Get some code from a GitHub repository
