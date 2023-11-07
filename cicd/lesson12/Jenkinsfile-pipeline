@@ -12,6 +12,10 @@ pipeline {
         ansiColor('xterm')
     }
 
+    parameters {
+        string defaultValue: 'test string', description: 'введите строку', name: 'MY_STRING'
+    }
+
     environment { 
         DB_URL = "jdbc:postgresql://158.160.125.220:5432/webbooks"
     }
@@ -19,6 +23,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                echo "${params.MY_STRING}"
                 // Get some code from a GitHub repository
                 // git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/levelup-devops/2023-09-example.git'
 
