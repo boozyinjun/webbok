@@ -6,6 +6,10 @@ pipeline {
         maven "MAVEN3.5.2"
     }
 
+    environment { 
+        DB_URL = "jdbc:postgresql://158.160.125.220:5432/webbooks"
+    }
+
     stages {
         stage('Build') {
             steps {
@@ -14,7 +18,8 @@ pipeline {
 
                 dir('apps/webbooks') {
                     // Run Maven on a Unix agent.
-                    sh "mvn -DDB.url=jdbc:postgresql://158.160.125.220:5432/webbooks package"
+                    sh "mvn package"
+                    // sh "mvn -DDB.url=jdbc:postgresql://158.160.125.220:5432/webbooks package"
                 }
             }
             post {
