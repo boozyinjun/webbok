@@ -12,6 +12,10 @@ pipeline {
         ansiColor('xterm')
     }
 
+    triggers {
+        cron('H */4 * * 1-5')
+    }
+
     parameters {
         string defaultValue: 'test string', description: 'введите строку', name: 'MY_STRING'
     }
@@ -23,14 +27,19 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "${params.MY_STRING}"
-                // Get some code from a GitHub repository
-                // git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/levelup-devops/2023-09-example.git'
+                script {
+                    if (env.BRANCH_NAME == "main") {
+                        echo "${params.MY_STRING}"
+                    }
+                
+                    // Get some code from a GitHub repository
+                    // git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/levelup-devops/2023-09-example.git'
 
-                dir('apps/webbooks') {
-                    // Run Maven on a Unix agent.
-                    sh "mvn package"
-                    // sh "mvn -DDB.url=jdbc:postgresql://158.160.125.220:5432/webbooks package"
+                    dir('apps/webbooks') {
+                        // Run Maven on a Unix agent.
+                        sh "mvn package"
+                        // sh "mvn -DDB.url=jdbc:postgresql://158.160.125.220:5432/webbooks package"
+                    }
                 }
             }
             post {
