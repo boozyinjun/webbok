@@ -34,6 +34,7 @@ pipeline {
         }
 
         stage('Artifacts') {
+            when { expression { env.BRANCH_NAME == "main" } }
             steps {
                 dir('apps/webbooks') {
                     // Run Maven on a Unix agent.
