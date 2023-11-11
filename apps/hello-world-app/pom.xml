@@ -11,7 +11,7 @@
    <repository>
      <id>github</id>
      <name>GitHub Levelup-Devops Apache Maven Packages</name>
-     <url>https://maven.pkg.github.com/levelup-devops/github</url>
+     <url>https://maven.pkg.github.com/levelup-devops/2023-09-example</url>
    </repository>
 </distributionManagement>
   <dependencies>
