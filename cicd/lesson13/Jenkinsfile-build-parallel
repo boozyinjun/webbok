@@ -62,7 +62,6 @@ pipeline {
 	  GITHUB_REPO_NAME = "2023-09-example"
       GITHUB_REPO_URL = "https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}.git"
       APPS_LIST_FILE = "apps/apps.json"
-      PARALLELS = 2
     }
 
     stages {
@@ -75,8 +74,8 @@ pipeline {
             steps {
                 script {
                     def apps = readJSON file: env.APPS_LIST_FILE
-                    buildStages = stagePrepare(apps, "build", env.PARALLELS)
-                    uploadStages = stagePrepare(apps, "upload", env.PARALLELS)
+                    buildStages = stagePrepare(apps, "build",  2)
+                    uploadStages = stagePrepare(apps, "upload",  2)
                 }
             }
         }
