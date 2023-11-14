@@ -1,45 +1,3 @@
-def stagePrepare(apps, action, parallel_executors) {
-    buildStageList = []
-    buildParallelMap = [:]
-    apps.eachWithIndex { app, value, i ->
-        Integer lock_id = i % parallel_executors
-        println lock_id
-        if (action == "build") {
-            buildParallelMap.put(app, stageBuildCreate(app, value, lock_id))
-        }
-        if (action == "upload") {
-            buildParallelMap.put(app, stageUploadCreate(app, value, lock_id))
-        }
-    }
-    buildStageList.add(buildParallelMap)
-    return buildStageList
-}
-
-def stageBuildCreate(app, value, lock_id) {
-    return {
-        stage(app) {
-            lock("Build-Lock-${lock_id}") {
-                dir("apps/${app}") {
-                    sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
-                }
-            }
-        }
-    }
-}
-
-def stageUploadCreate(app, value, lock_id) {
-    return {
-        stage(app) {
-            lock("Upload-Lock-${lock_id}") {
-                dir("apps/${app}") {
-                    sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
-                }
-            }
-        }
-    }
-}
-
-
 
 pipeline {
     agent any
@@ -73,10 +31,11 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
+                    func = load 'cicd/lesson13/func.groovy'
                     Integer parallel_executors = 2
                     def apps = readJSON file: env.APPS_LIST_FILE
-                    buildStages = stagePrepare(apps, "build", parallel_executors)
-                    uploadStages = stagePrepare(apps, "upload", parallel_executors)
+                    buildStages = func.stagePrepare(apps, "build", parallel_executors)
+                    uploadStages = func.stagePrepare(apps, "upload", parallel_executors)
                 }
             }
         }
