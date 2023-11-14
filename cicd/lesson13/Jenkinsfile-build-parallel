@@ -1,4 +1,5 @@
 def stagePrepare(apps, action, parallel_executors) {
+    println parallel_executors
     buildStageList = []
     buildParallelMap = [:]
     apps.each { app, value, i ->
