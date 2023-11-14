@@ -53,7 +53,9 @@ pipeline {
             steps {
                 script {
                     def apps = readJSON file: env.APPS_LIST_FILE
+                    println apps
                     buildStages = stagePrepare(apps)
+                    println buildStages
                 }
             }
         }
