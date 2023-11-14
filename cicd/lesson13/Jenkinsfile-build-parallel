@@ -2,7 +2,7 @@ def stagePrepare(apps, action, parallel_executors) {
     buildStageList = []
     buildParallelMap = [:]
     apps.each { app, value, i ->
-        lock_id = i % parallel_executors
+        Integer lock_id = i % parallel_executors
         println lock_id
         if (action == "build") {
             buildParallelMap.put(app, stageBuildCreate(app, value, lock_id))
@@ -73,9 +73,10 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
+                    Integer parallel_executors = 2
                     def apps = readJSON file: env.APPS_LIST_FILE
-                    buildStages = stagePrepare(apps, "build",  2)
-                    uploadStages = stagePrepare(apps, "upload",  2)
+                    buildStages = stagePrepare(apps, "build", parallel_executors)
+                    uploadStages = stagePrepare(apps, "upload", parallel_executors)
                 }
             }
         }
