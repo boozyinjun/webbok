@@ -1,18 +1,33 @@
-def stagePrepare(apps) {
+def stagePrepare(apps, action) {
     buildStageList = []
     buildParallelMap = [:]
     apps.each { app, value ->
-        buildParallelMap.put(app, stageCreate(app, value))
+        if (action == "build") {
+            buildParallelMap.put(app, stageBuildCreate(app, value))
+        }
+        if (action == "upload") {
+            buildParallelMap.put(app, stageUploadCreate(app, value))
+        }
     }
     buildStageList.add(buildParallelMap)
     return buildStageList
 }
 
-def stageCreate(app, value) {
+def stageBuildCreate(app, value) {
     return {
         stage(app) {
             dir("apps/${app}") {
                 sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+            }
+        }
+    }
+}
+
+def stageUploadCreate(app, value) {
+    return {
+        stage(app) {
+            dir("apps/${app}") {
+                sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
             }
         }
     }
@@ -53,9 +68,8 @@ pipeline {
             steps {
                 script {
                     def apps = readJSON file: env.APPS_LIST_FILE
-                    println apps
-                    buildStages = stagePrepare(apps)
-                    println buildStages
+                    buildStages = stagePrepare(apps, "build")
+                    uploadStages = stagePrepare(apps, "upload")
                 }
             }
         }
@@ -65,6 +79,16 @@ pipeline {
                 script {
                     buildStages.each { build ->
                         parallel build
+                    }
+                }
+            }
+        }
+
+        stage('Upload') {
+            steps {
+                script {
+                    uploadStages.each { upload ->
+                        parallel upload
                     }
                 }
             }
