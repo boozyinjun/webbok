@@ -1,33 +1,39 @@
-def stagePrepare(apps, action) {
+def stagePrepare(apps, action, parallel_executors) {
     buildStageList = []
     buildParallelMap = [:]
-    apps.each { app, value ->
+    apps.each { app, value, i ->
+        lock_id = i % parallel_executors
+        println lock_id
         if (action == "build") {
-            buildParallelMap.put(app, stageBuildCreate(app, value))
+            buildParallelMap.put(app, stageBuildCreate(app, value, lock_id))
         }
         if (action == "upload") {
-            buildParallelMap.put(app, stageUploadCreate(app, value))
+            buildParallelMap.put(app, stageUploadCreate(app, value, lock_id))
         }
     }
     buildStageList.add(buildParallelMap)
     return buildStageList
 }
 
-def stageBuildCreate(app, value) {
+def stageBuildCreate(app, value, lock_id) {
     return {
         stage(app) {
-            dir("apps/${app}") {
-                sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+            lock("Build-Lock-${lock_id}") {
+                dir("apps/${app}") {
+                    sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+                }
             }
         }
     }
 }
 
-def stageUploadCreate(app, value) {
+def stageUploadCreate(app, value, lock_id) {
     return {
         stage(app) {
-            dir("apps/${app}") {
-                sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
+            lock("Upload-Lock-${lock_id}") {
+                dir("apps/${app}") {
+                    sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
+                }
             }
         }
     }
@@ -56,6 +62,7 @@ pipeline {
 	  GITHUB_REPO_NAME = "2023-09-example"
       GITHUB_REPO_URL = "https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}.git"
       APPS_LIST_FILE = "apps/apps.json"
+      PARALLELS = 2
     }
 
     stages {
@@ -68,8 +75,8 @@ pipeline {
             steps {
                 script {
                     def apps = readJSON file: env.APPS_LIST_FILE
-                    buildStages = stagePrepare(apps, "build")
-                    uploadStages = stagePrepare(apps, "upload")
+                    buildStages = stagePrepare(apps, "build", env.PARALLELS)
+                    uploadStages = stagePrepare(apps, "upload", env.PARALLELS)
                 }
             }
         }
