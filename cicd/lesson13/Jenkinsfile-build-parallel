@@ -1,8 +1,7 @@
 def stagePrepare(apps, action, parallel_executors) {
-    println parallel_executors
     buildStageList = []
     buildParallelMap = [:]
-    apps.each { app, value, i ->
+    apps.eachWithIndex { app, value, i ->
         Integer lock_id = i % parallel_executors
         println lock_id
         if (action == "build") {
