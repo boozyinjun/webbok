@@ -1,0 +1,71 @@
+def stagePrepare(apps) {
+    buildStageList = []
+    buildParallelMap = [:]
+    apps.each { app, value ->
+        buildParallelMap.put(app, stageCreate(app, value))
+    }
+    buildStageList.add(buildParallelMap)
+    return buildStageList
+}
+
+def stageCreate(app, value) {
+    return {
+        stage(app) {
+            dir("apps/${app}") {
+                sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+            }
+        }
+    }
+}
+
+
+
+pipeline {
+    agent any
+    
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+        disableConcurrentBuilds()
+        timestamps()
+        ansiColor('xterm')
+    }
+
+    tools {
+        jdk 'JDK8'
+        maven 'MAVEN3.8.6'
+    }
+
+    environment {
+      GITHUB_REPO_CRED = credentials("github-http")
+      GITHUB_REPO_OWNER = "levelup-devops"
+	  GITHUB_REPO_NAME = "2023-09-example"
+      GITHUB_REPO_URL = "https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}.git"
+      APPS_LIST_FILE = "apps/apps.json"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', changelog: false, credentialsId: 'github-http', poll: false, url: env.GITHUB_REPO_URL
+            }
+        }
+        stage('Prepare') {
+            steps {
+                script {
+                    def apps = readJSON file: env.APPS_LIST_FILE
+                    buildStages = stagePrepare(apps)
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    buildStages.each { build ->
+                        parallel build
+                    }
+                }
+            }
+        }
+    }
+}

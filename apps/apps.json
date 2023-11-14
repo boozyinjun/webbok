@@ -1,0 +1,5 @@
+{
+    "hello-world-app":{"path": "apps/hello-world-app"},
+    "hello-jenkins-app":{"path": "apps/hello-jenkins-app"},
+    "hello-devops-app":{"path": "apps/hello-devops-app"}
+}
