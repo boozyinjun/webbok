@@ -26,18 +26,61 @@ pipeline {
                 git branch: 'main', changelog: false, credentialsId: 'github-http', poll: false, url: env.GITHUB_REPO_URL
             }
         }
-
-        stage('Build') {
-            steps {
-                dir('apps/hello-world-app') {
-                    sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+        stage('Parallel Stage') {
+            parallel {
+                stage('hello-world-app') {
+                    stages {
+                        stage('Build') {
+                            steps {
+                                dir('apps/hello-world-app') {
+                                    sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+                                }
+                            }
+                        }
+                        stage('Upload') {
+                            steps {
+                                dir('apps/hello-world-app') {
+                                    sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-        }
-        stage('Upload') {
-            steps {
-                dir('apps/hello-world-app') {
-                    sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
+                stage('hello-jenkins-app') {
+                    stages {
+                        stage('Build') {
+                            steps {
+                                dir('apps/hello-jenkins-app') {
+                                    sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+                                }
+                            }
+                        }
+                        stage('Upload') {
+                            steps {
+                                dir('apps/hello-jenkins-app') {
+                                    sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('hello-devops-app') {
+                    stages {
+                        stage('Build') {
+                            steps {
+                                dir('apps/hello-devops-app') {
+                                    sh "mvn -B -DskipTests -Dmaven.repo.local=${WORKSPACE}/.m2/repository clean package"
+                                }
+                            }
+                        }
+                        stage('Upload') {
+                            steps {
+                                dir('apps/hello-devops-app') {
+                                    sh "mvn -DskipTests -s settings.xml -Dmaven.repo.local=${WORKSPACE}/.m2/repository deploy"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
