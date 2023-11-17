@@ -1,6 +1,9 @@
 # vagrant
 .vagrant
 
+# terraform
+.terraform*
+
 # Cache objects
 packer_cache/
 
