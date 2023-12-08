@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "nginx"
+  namespace: default
+  labels:
+    app: "nginx"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    env:
+      - name: ENV_EXAMPLE
+        valueFrom:
+          configMapKeyRef:
+            name: nginx
+            key: my-key
+    ports:
+    - containerPort: 80
+      name:  http
+    volumeMounts:
+    - name: nginx-conf
+      mountPath: /etc/nginx/conf.d/default.conf
+      subPath: default.conf
+    - name: nginx-conf
+      mountPath: /usr/share/nginx/html/index.html
+      subPath: index.html
+  volumes:
+    - name: nginx-conf
+      configMap:
+        name: nginx
+        items:
+          - key: nginx.conf
+            path: default.conf
+          - key: index.html
+            path: index.html
+  restartPolicy: Always
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx
+  namespace: default
+data:
+  my-key: myy-value
+  nginx.conf: |
+    server {
+      listen       80;
+      server_name  localhost;
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+      }
+    }
+  index.html: <h1>Hello World!</h1>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  selector:
+    app: nginx
+  type: NodePort
+  ports:
+  - name: nginx
+    protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30100
