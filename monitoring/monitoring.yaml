@@ -1,0 +1,87 @@
+version: '3.3'
+services:
+  prometheus:
+    image: bitnami/prometheus:latest
+    container_name: prometheus
+    ports:
+    - '9090:9090'
+    volumes:
+    - prometheus_data:/opt/bitnami/prometheus/data
+    - ${DOCKER_HOST_HOME}/prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+    - ${DOCKER_HOST_HOME}/prometheus/alerts.yml:/opt/bitnami/prometheus/conf/alerts.yml
+    networks:
+      - ${NETWORK_NAME}
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+    ports:
+      - '9100:9100'
+    networks:
+      - ${NETWORK_NAME}
+
+  cadvisor:
+    image: google/cadvisor
+    container_name: cadvisor
+    privileged: true
+    volumes:
+      - '/:/rootfs:ro'
+      - '/var/run:/var/run:ro'
+      - '/sys:/sys:ro'
+      - '/var/lib/docker/:/var/lib/docker:ro'
+      - '/dev/disk/:/dev/disk:ro'
+    ports:
+      - '8080:8080'
+    networks:
+      - ${NETWORK_NAME}
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    networks:
+      - ${NETWORK_NAME}
+
+  alertmanager:
+    image: bitnami/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+    - alertmanager-data:/opt/bitnami/alertmanager/data
+    - ${DOCKER_HOST_HOME}/alertmanager/config.yml:/opt/bitnami/alertmanager/conf/config.yml
+    ports:
+    - 9093:9093
+    networks:
+      - ${NETWORK_NAME}
+
+  ab:
+    image: jordi/ab
+    container_name: ab
+    command:
+      - '-c 5'
+      - '-n 100'
+      - 'http://ui:9292/'
+    networks:
+      - ${NETWORK_NAME}
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager-data:
+
+networks:
+  monitoring:
