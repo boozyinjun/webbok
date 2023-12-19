@@ -12,40 +12,43 @@ services:
     networks:
       - ${NETWORK_NAME}
 
-  node-exporter:
-    image: quay.io/prometheus/node-exporter:latest
-    container_name: node_exporter
-    command:
-      - '--path.rootfs=/host'
-    pid: host
-    restart: unless-stopped
-    volumes:
-      - '/:/host:ro,rslave'
-    ports:
-      - '9100:9100'
-    networks:
-      - ${NETWORK_NAME}
+  # node-exporter:
+  #   image: quay.io/prometheus/node-exporter:latest
+  #   container_name: node_exporter
+  #   command:
+  #     - '--path.rootfs=/host'
+  #   pid: host
+  #   restart: unless-stopped
+  #   volumes:
+  #     - '/:/host:ro,rslave'
+  #   ports:
+  #     - '9100:9100'
+  #   networks:
+  #     - ${NETWORK_NAME}
 
-  cadvisor:
-    image: google/cadvisor
-    container_name: cadvisor
-    privileged: true
-    volumes:
-      - '/:/rootfs:ro'
-      - '/var/run:/var/run:ro'
-      - '/sys:/sys:ro'
-      - '/var/lib/docker/:/var/lib/docker:ro'
-      - '/dev/disk/:/dev/disk:ro'
-    ports:
-      - '8080:8080'
-    networks:
-      - ${NETWORK_NAME}
+  # cadvisor:
+  #   image: google/cadvisor
+  #   container_name: cadvisor
+  #   privileged: true
+  #   volumes:
+  #     - '/:/rootfs:ro'
+  #     - '/var/run:/var/run:ro'
+  #     - '/sys:/sys:ro'
+  #     - '/var/lib/docker/:/var/lib/docker:ro'
+  #     - '/dev/disk/:/dev/disk:ro'
+  #   ports:
+  #     - '8080:8080'
+  #   networks:
+  #     - ${NETWORK_NAME}
 
   grafana:
     image: grafana/grafana-oss
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
+      - ${DOCKER_HOST_HOME}/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ${DOCKER_HOST_HOME}/grafana/datasource.yml:/etc/grafana/provisioning/datasources/main.yaml
+      - ${DOCKER_HOST_HOME}/grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -72,11 +75,11 @@ services:
     image: jordi/ab
     container_name: ab
     command:
-      - '-c 5'
-      - '-n 100'
+      - '-c 20'
+      - '-n 500'
       - 'http://ui:9292/'
     networks:
-      - ${NETWORK_NAME}
+      - monitoring
 
 volumes:
   prometheus_data:

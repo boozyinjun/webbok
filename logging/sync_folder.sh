@@ -9,7 +9,7 @@ red="$( echo -e '\033[0;31m' )" # Red
 grn="$( echo -e '\033[0;32m' )" # Green
 rst="$( echo -e '\033[0m' )"    # Reset Color format
 
-echo -e $grn"\nSynchronizing folder..."$rst
+echo -e $grn"\nSynchronizing folder $SYNC_FOLDER..."$rst
 cd ..
-scp -r ./"$SYNC_FOLDER/" "$MACHINE_USER"@"$DOCKER_HOST":"/home/$MACHINE_USER/"
+scp -r ./"$SYNC_FOLDER/" "$MACHINE_USER"@"$DOCKER_HOST":"/home/$MACHINE_USER"
 cd "$CWD"
