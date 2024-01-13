@@ -10,11 +10,11 @@ pipeline {
         stage('Build') {
             steps {
                 // Get some code from a GitHub repository
-                git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/levelup-devops/2023-09-example.git'
+                git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/boozyinjun/webbok.git'
 
                 dir('apps/webbooks') {
                     // Run Maven on a Unix agent.
-                    sh "mvn -DDB.url=jdbc:postgresql://158.160.125.220:5432/webbooks package"
+                    sh "mvn -DDB.url=jdbc:postgresql://158.160.127.224:5432/db_webboks package"
                 }
                 
             }
