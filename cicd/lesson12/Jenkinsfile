@@ -72,8 +72,8 @@ pipeline {
                         kubeconfig(credentialsId: 'k8s-service-account-token', serverUrl: 'https://10.128.0.31:6443') {
                             // Применяем измененные конфигурации Kubernetes
                             sh "kubectl apply -f k8s-deployment.yaml"
-                            sh "kubectl apply -f k8s-service.yaml"
-                    }
+                        }   sh "kubectl apply -f k8s-service.yaml"
+                    }   
                 }
             }
         }
