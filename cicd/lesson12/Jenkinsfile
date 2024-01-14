@@ -44,7 +44,7 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS_ID) {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB_CREDENTIALS_ID) {
                         sh "docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}"
                         sh "docker push ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}"
                         // По желанию: пушите также latest тег
