@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     sh "cp ${env.WORKSPACE}/apps/webbooks/target/*.jar ."
-                    sh "docker build -t ${IMAGE_TAG} -f Dockerfile ."
+                    sh "docker build -t ${IMAGE_TAG} -f ${env.WORKSPACE}/cicd/lesson12/Dockerfile ."
                 }
             }
         }
