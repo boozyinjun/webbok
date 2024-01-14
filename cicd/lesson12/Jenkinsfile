@@ -2,7 +2,7 @@ pipeline {
     agent { label 'master' }
 
     tools {
-        // Install the Maven version configured as "M3" and add it to the path.
+        // Install the Maven version configured as "M3" and add it to the path.OXO
         maven "MAVEN3.5.0"
     }
 
@@ -27,6 +27,19 @@ pipeline {
                         junit '**/target/surefire-reports/TEST-*.xml'
                         archiveArtifacts 'target/*.jar'
                     }
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Установка переменных окружения для Docker, если необходимо
+                    env.DOCKER_IMAGE_NAME = "webbok"
+                    env.DOCKERFILE_PATH = "./Dockerfile"
+    
+                    // Шаг для сборки Docker-образа
+                    sh "docker build -t $DOCKER_IMAGE_NAME -f $DOCKERFILE_PATH ."
                 }
             }
         }
