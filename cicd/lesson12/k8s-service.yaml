@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webbok-service
+spec:
+  type: NodePort  # тип сервиса - NodePort делает сервис доступным за пределами кластера
+  selector:
+    app: webbok  # селектор указывает на поды, которые этот сервис будет балансировать
+  ports:
+    - port: 8585  # порт, доступный снаружи
+      targetPort: 8080  # порт внутри подов, на который будет перенаправлен трафик
+      protocol: TCP
