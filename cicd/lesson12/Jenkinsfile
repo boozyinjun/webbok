@@ -7,6 +7,11 @@ pipeline {
         maven 'MAVEN3.5.0'
     }
 
+    environment {
+        DOCKER_HUB_USERNAME = credentials('DockerHubCreds').username
+        DOCKER_HUB_PASSWORD = credentials('DockerHubCreds').password
+    }
+
     stages {
         stage('Build') {
             steps {
@@ -32,10 +37,21 @@ pipeline {
                     env.DOCKER_IMAGE_NAME = 'webbok'
                     env.DOCKERFILE_PATH = 'cicd/lesson12/Dockerfile'
                     env.JAR_FILE_PATH = "${env.WORKSPACE}/apps/webbooks/target/*.jar"
+                    env.IMAGE_TAG = "v1.${env.BUILD_NUMBER}"
 
                     sh 'cp $JAR_FILE_PATH .'
-                    sh 'docker build -t $DOCKER_IMAGE_NAME -f $DOCKERFILE_PATH .'
+                    sh 'docker build -t $DOCKER_IMAGE_NAME:$IMAGE_TAG -f $DOCKERFILE_PATH .'
+                    sh 'docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD'
+                    sh 'docker push $DOCKER_IMAGE_NAME:$IMAGE_TAG'
                 }
+            }
+        }
+        
+        // Добавьте остальные этапы вашего пайплайна
+        
+        stage('Clean Up') {
+            steps {
+                sh "docker rmi $DOCKER_IMAGE_NAME:$IMAGE_TAG"
             }
         }
     }
