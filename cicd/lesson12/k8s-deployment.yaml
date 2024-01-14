@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: webbok-container
-        image: ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}  # IMAGE_TAG используется здесь
+        image: boozyinjun/webbok:latest  # Для использования последнего образа
         ports:
         - containerPort: 8080
