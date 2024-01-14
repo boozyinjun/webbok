@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webbok-deployment
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webbok
+  template:
+    metadata:
+      labels:
+        app: webbok
+    spec:
+      containers:
+      - name: webbok-container
+        image: boozyinjun/webbok:${BUILD_NUMBER} # Используйте переменную Jenkins для тега
+        ports:
+        - containerPort: 8080
