@@ -31,7 +31,7 @@ pipeline {
                 script {
                     env.DOCKER_IMAGE_NAME = 'webbok'
                     env.DOCKERFILE_PATH = 'cicd/lesson12/Dockerfile'
-                    env.JAR_FILE_PATH = 'apps/webbooks/target/*.jar'
+                    env.JAR_FILE_PATH = "${env.WORKSPACE}/apps/webbooks/target/*.jar"
 
                     sh 'cp $JAR_FILE_PATH .'
                     sh 'docker build -t $DOCKER_IMAGE_NAME -f $DOCKERFILE_PATH .'
