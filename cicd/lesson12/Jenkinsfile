@@ -69,7 +69,7 @@ pipeline {
                     dir(K8S_FILES_PATH) {
                         // Заменяем используемый Docker образ на собранный
                         sh "sed -i 's|boozyinjun/webbok:latest|${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}|' k8s-deployment.yaml"
-                        
+                        sh "cat k8s-deployment.yaml"
                         // Используя учетные данные для kubectl
                         kubeconfig(credentialsId: K8S_CREDENTIALS_ID, serverUrl: K8S_SERVER_URL) {
                             // Применяем конфигурации Kubernetes
