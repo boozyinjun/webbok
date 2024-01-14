@@ -7,13 +7,13 @@ pipeline {
         maven 'MAVEN3.5.0'
     }
 
-    environment {
-        DOCKER_HUB_USERNAME = credentials('DockerHubCreds').username
-        DOCKER_HUB_PASSWORD = credentials('DockerHubCreds').password
-    }
-
     stages {
         stage('Build') {
+            environment {
+                DOCKER_HUB_USERNAME = credentials('DockerHubCreds').username
+                DOCKER_HUB_PASSWORD = credentials('DockerHubCreds').password
+            }
+
             steps {
                 git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/boozyinjun/webbok.git'
                 dir('apps/webbooks') {
@@ -51,9 +51,11 @@ pipeline {
 
         stage('Clean Up') {
             steps {
-                def dockerImageName = 'webbok'
-                def imageTag = "v1.${env.BUILD_NUMBER}"
-                sh "docker rmi ${dockerImageName}:${imageTag}"
+                script {
+                    def dockerImageName = 'webbok'
+                    def imageTag = "v1.${env.BUILD_NUMBER}"
+                    sh "docker rmi ${dockerImageName}:${imageTag}"
+                }
             }
         }
     }
