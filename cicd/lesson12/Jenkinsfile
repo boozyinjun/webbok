@@ -68,9 +68,11 @@ pipeline {
                         // Заменяем используемый Docker образ в файле deployment на собранный образ с тегом номера сборки
                         sh "sed -i 's|boozyinjun/webbok:latest|${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}|' k8s-deployment.yaml"
                         
-                        // Применяем измененные конфигурации Kubernetes
-                        sh "kubectl apply -f k8s-deployment.yaml"
-                        sh "kubectl apply -f k8s-service.yaml"
+                        // Используем kubeconfig для настройки доступа к Kubernetes
+                        kubeconfig(credentialsId: 'k8s-service-account-token', serverUrl: 'https://10.128.0.31:6443') {
+                            // Применяем измененные конфигурации Kubernetes
+                            sh "kubectl apply -f k8s-deployment.yaml"
+                            sh "kubectl apply -f k8s-service.yaml"
                     }
                 }
             }
