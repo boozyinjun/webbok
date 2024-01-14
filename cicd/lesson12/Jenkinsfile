@@ -1,1 +1,34 @@
+pipeline {
+    agent { label 'master' }
 
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "MAVEN3.5.0"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/boozyinjun/webbok.git'
+
+                dir('apps/webbooks') {
+                    // Run Maven on a Unix agent.
+                    sh "mvn -DDB.url=jdbc:postgresql://158.160.127.224:5432/db_webboks package"
+                }
+                
+            }
+
+            post {
+                // If Maven was able to run the tests, even if some of the test
+                // failed, record the test results and archive the jar file.
+                success {
+                    dir('apps/webbooks') {
+                        junit '**/target/surefire-reports/TEST-*.xml'
+                        archiveArtifacts 'target/*.jar'
+                    }
+                }
+            }
+        }
+    }
+}
