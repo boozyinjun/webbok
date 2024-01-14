@@ -34,24 +34,26 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    env.DOCKER_IMAGE_NAME = 'webbok'
-                    env.DOCKERFILE_PATH = 'cicd/lesson12/Dockerfile'
-                    env.JAR_FILE_PATH = "${env.WORKSPACE}/apps/webbooks/target/*.jar"
-                    env.IMAGE_TAG = "v1.${env.BUILD_NUMBER}"
+                    def dockerImageName = 'webbok'
+                    def dockerfilePath = 'cicd/lesson12/Dockerfile'
+                    def jarFilePath = "${env.WORKSPACE}/apps/webbooks/target/*.jar"
+                    def imageTag = "v1.${env.BUILD_NUMBER}"
 
-                    sh 'cp $JAR_FILE_PATH .'
-                    sh 'docker build -t $DOCKER_IMAGE_NAME:$IMAGE_TAG -f $DOCKERFILE_PATH .'
-                    sh 'docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD'
-                    sh 'docker push $DOCKER_IMAGE_NAME:$IMAGE_TAG'
+                    sh "cp $jarFilePath ."
+                    sh "docker build -t ${dockerImageName}:${imageTag} -f ${dockerfilePath} ."
+                    sh "docker login -u '${DOCKER_HUB_USERNAME}' -p '${DOCKER_HUB_PASSWORD}'"
+                    sh "docker push ${dockerImageName}:${imageTag}"
                 }
             }
         }
-        
+
         // Добавьте остальные этапы вашего пайплайна
-        
+
         stage('Clean Up') {
             steps {
-                sh "docker rmi $DOCKER_IMAGE_NAME:$IMAGE_TAG"
+                def dockerImageName = 'webbok'
+                def imageTag = "v1.${env.BUILD_NUMBER}"
+                sh "docker rmi ${dockerImageName}:${imageTag}"
             }
         }
     }
