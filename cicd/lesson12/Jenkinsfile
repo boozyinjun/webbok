@@ -7,27 +7,18 @@ pipeline {
         maven 'MAVEN3.5.0'
     }
 
+    environment {
+        DOCKER_HUB_USERNAME = "'${credentials('DockerHubCreds').username}'"
+        DOCKER_HUB_PASSWORD = "'${credentials('DockerHubCreds').password}'"
+    }
+
     stages {
         stage('Build') {
-            environment {
-                DOCKER_HUB_USERNAME = credentials('DockerHubCreds').username
-                DOCKER_HUB_PASSWORD = credentials('DockerHubCreds').password
-            }
-
             steps {
-                git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/boozyinjun/webbok.git'
-                dir('apps/webbooks') {
-                    sh 'mvn -DDB.url=jdbc:postgresql://158.160.127.224:5432/db_webboks package'
-                }
+                // Ваши шаги сборки
             }
-
             post {
-                success {
-                    dir('apps/webbooks') {
-                        junit '**/target/surefire-reports/TEST-*.xml'
-                        archiveArtifacts 'target/*.jar'
-                    }
-                }
+                // Ваши действия после успешной сборки
             }
         }
 
@@ -41,7 +32,7 @@ pipeline {
 
                     sh "cp $jarFilePath ."
                     sh "docker build -t ${dockerImageName}:${imageTag} -f ${dockerfilePath} ."
-                    sh "docker login -u '${DOCKER_HUB_USERNAME}' -p '${DOCKER_HUB_PASSWORD}'"
+                    sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
                     sh "docker push ${dockerImageName}:${imageTag}"
                 }
             }
