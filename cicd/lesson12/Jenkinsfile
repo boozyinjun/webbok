@@ -2,7 +2,7 @@ pipeline {
     agent { label 'master' }
 
     tools {
-        // Install the Maven version configured as "M3" and add it to the path.
+        // Install the Maven version configured as "M3" and add it to the path.OXO
         maven "MAVEN3.5.0"
     }
 
