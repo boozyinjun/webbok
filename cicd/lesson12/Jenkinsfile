@@ -11,9 +11,11 @@ pipeline {
         IMAGE_TAG = "webbok:${env.BUILD_NUMBER}"
         DOCKER_HUB_REPO = "boozyinjun/webbok"
         DOCKER_HUB_CREDENTIALS_ID = "DockerHubCreds"
-        K8S_FILES_PATH = "path/to/your/k8s/files"
+        K8S_FILES_PATH = "${env.WORKSPACE}/cicd/lesson12" // Путь к файлам k8s
         GIT_CREDENTIALS_ID = 'github-http'
         GIT_REPO_URL = 'https://github.com/boozyinjun/webbok.git'
+        K8S_CREDENTIALS_ID = 'k8s-service-account-token' // Учетные данные Kubernetes
+        K8S_SERVER_URL = 'https://10.128.0.31:6443' // API сервер Kubernetes
     }
 
     stages {
@@ -43,7 +45,7 @@ pipeline {
             steps {
                 script {
                     sh "cp ${env.WORKSPACE}/apps/webbooks/target/*.jar ."
-                    sh "docker build -t ${IMAGE_TAG} -f ${env.WORKSPACE}/cicd/lesson12/Dockerfile ."
+                    sh "docker build -t ${IMAGE_TAG} -f ${K8S_FILES_PATH}/Dockerfile ."
                 }
             }
         }
@@ -64,20 +66,22 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    dir("${env.WORKSPACE}/cicd/lesson12") { // Укажите путь к файлам k8s
-                        // Заменяем используемый Docker образ в файле deployment на собранный образ с тегом номера сборки
+                    dir(K8S_FILES_PATH) {
+                        // Заменяем используемый Docker образ на собранный
                         sh "sed -i 's|boozyinjun/webbok:latest|${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}|' k8s-deployment.yaml"
                         
-                        // Используем kubeconfig для настройки доступа к Kubernetessss
-                        kubeconfig(credentialsId: 'k8s-service-account-token', serverUrl: 'https://10.128.0.31:6443') {
-                            // Применяем измененные конфигурации Kubernetes
+                        // Используя учетные данные для kubectl
+                        kubeconfig(credentialsId: K8S_CREDENTIALS_ID, serverUrl: K8S_SERVER_URL) {
+                            // Применяем конфигурации Kubernetes
                             sh "kubectl apply -f k8s-deployment.yaml"
-                        }   sh "kubectl apply -f k8s-service.yaml"
+                            sh "kubectl apply -f k8s-service.yaml"
+                        }
                     }   
                 }
             }
         }
     }
+    
     post {
         always {
             cleanWs()
