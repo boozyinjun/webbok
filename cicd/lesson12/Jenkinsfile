@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     sh "cp ${env.WORKSPACE}/apps/webbooks/target/*.jar ."
-                    sh 'docker build -t ${IMAGE_TAG} -f ${env.WORKSPACE}/cicd/lesson12/Dockerfile .'
+                    sh "docker build -t ${IMAGE_TAG} -f ${env.WORKSPACE}/cicd/lesson12/Dockerfile ."
                 }
             }
         }
@@ -45,11 +45,11 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS_ID) {
-                        sh 'docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}'
-                        sh 'docker push ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}'
+                        sh "docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}"
+                        sh "docker push ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}"
                         // По желанию: пушите также latest тег
-                        sh 'docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:latest'
-                        sh 'docker push ${DOCKER_HUB_REPO}:latest'
+                        sh "docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:latest"
+                        sh "docker push ${DOCKER_HUB_REPO}:latest"
                     }
                 }
             }
