@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         IMAGE_TAG = "webbok:${env.BUILD_NUMBER}"
-        DOCKER_HUB_REPO = "boozyinjun/webbok" // Поменяйте на свой репозиторий в Docker Hubbb
+        DOCKER_HUB_REPO = "boozyinjun/webbok" // Поменяйте на свой репозиторий в Docker Hubbbb
         DOCKER_HUB_CREDENTIALS_ID = "DockerHubCreds" // ID для аутентификации на Docker Hubb
     }
 
