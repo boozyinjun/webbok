@@ -8,44 +8,49 @@ pipeline {
     }
 
     environment {
-        DOCKER_HUB_USERNAME = "'${credentials('DockerHubCreds').username}'"
-        DOCKER_HUB_PASSWORD = "'${credentials('DockerHubCreds').password}'"
+        IMAGE_TAG = "webbok:${env.BUILD_NUMBER}"
+        DOCKER_HUB_REPO = "boozyinjun/webbok" // Поменяйте на свой репозиторий в Docker Hub
+        DOCKER_HUB_CREDENTIALS_ID = "DockerHubCreds" // ID для аутентификации на Docker Hub
     }
 
     stages {
         stage('Build') {
             steps {
-                // Ваши шаги сборки
+                git branch: 'main', credentialsId: 'github-http', poll: false, url: 'https://github.com/boozyinjun/webbok.git'
+                dir('apps/webbooks') {
+                    sh 'mvn -DDB.url=jdbc:postgresql://158.160.127.224:5432/db_webboks package'
+                }
             }
+
             post {
-                // Ваши действия после успешной сборки
+                success {
+                    dir('apps/webbooks') {
+                        junit '**/target/surefire-reports/TEST-*.xml'
+                        archiveArtifacts 'target/*.jar'
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImageName = 'webbok'
-                    def dockerfilePath = 'cicd/lesson12/Dockerfile'
-                    def jarFilePath = "${env.WORKSPACE}/apps/webbooks/target/*.jar"
-                    def imageTag = "v1.${env.BUILD_NUMBER}"
-
-                    sh "cp $jarFilePath ."
-                    sh "docker build -t ${dockerImageName}:${imageTag} -f ${dockerfilePath} ."
-                    sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
-                    sh "docker push ${dockerImageName}:${imageTag}"
+                    sh 'cp ${env.WORKSPACE}/apps/webbooks/target/*.jar .'
+                    sh 'docker build -t ${IMAGE_TAG} -f ${env.WORKSPACE}/cicd/lesson12/Dockerfile .'
                 }
             }
         }
 
-        // Добавьте остальные этапы вашего пайплайна
-
-        stage('Clean Up') {
+        stage('Push to Docker Hub') {
             steps {
                 script {
-                    def dockerImageName = 'webbok'
-                    def imageTag = "v1.${env.BUILD_NUMBER}"
-                    sh "docker rmi ${dockerImageName}:${imageTag}"
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS_ID) {
+                        sh 'docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}'
+                        sh 'docker push ${DOCKER_HUB_REPO}:${env.BUILD_NUMBER}'
+                        // По желанию: пушите также latest тег
+                        sh 'docker tag ${IMAGE_TAG} ${DOCKER_HUB_REPO}:latest'
+                        sh 'docker push ${DOCKER_HUB_REPO}:latest'
+                    }
                 }
             }
         }
