@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: webbok-service
 spec:
-  type: LoadBalancer  # Изменяем тип сервиса на LoadBalancer
   selector:
     app: webbok
+  type: NodePort
   ports:
     - protocol: TCP
-      port: 8585
+      port: 80
       targetPort: 8080
+      nodePort: 30007
