@@ -11,7 +11,7 @@ pipeline {
         IMAGE_TAG = "webbok:${env.BUILD_NUMBER}"
         DOCKER_HUB_REPO = "boozyinjun/webbok"
         DOCKER_HUB_CREDENTIALS_ID = "DockerHubCreds"
-        K8S_FILES_PATH = "${env.WORKSPACE}/cicd/lesson12" // Путь к файлам k8s
+        K8S_FILES_PATH = "${env.WORKSPACE}/cicd/lesson12" // Путь к файлам k8ss
         GIT_CREDENTIALS_ID = 'github-http'
         GIT_REPO_URL = 'https://github.com/boozyinjun/webbok.git'
         K8S_CREDENTIALS_ID = 'k8s-service-account-token' // Учетные данные Kubernetes
