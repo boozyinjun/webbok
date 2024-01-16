@@ -12,9 +12,13 @@ echo "Создание Kind Kubernetes кластера..."
 kind create cluster --name webboks --config=<(echo '
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+name: webboks
 nodes:
 - role: control-plane
 - role: worker
+networking:
+  apiServerAddress: "158.160.127.224"
+  apiServerPort: 6443
 ')
 
 # Создание namespaces
