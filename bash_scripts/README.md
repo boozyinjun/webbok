@@ -2,11 +2,11 @@
 Устанвливает Kind Kubernetes делает конфигурирование.
 
 ```sh
-create_kind.sh
+./ create_kind.sh
 ```
 Установка необходимых пакетов
 ```sh
-install-tools.sh
+./ install-tools.sh
 ```
 - curl 
 - wget
