@@ -1,7 +1,0 @@
-- name: Common configure
-  gather_facts: false
-  hosts: all
-
-  roles:
-    - role: common
-      java_install: true

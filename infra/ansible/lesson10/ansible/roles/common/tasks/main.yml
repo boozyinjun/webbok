@@ -1,3 +1,0 @@
----
-- include: 01_configure_hosts.yml
-- include: 02_install_java.yml

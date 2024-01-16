@@ -1,6 +1,0 @@
-- name: Patroni install
-  become: true
-  hosts: patroni
-
-  roles:
-    - role: patroni
